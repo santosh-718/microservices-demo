@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: product
-        image: your-dockerhub/product
+        image: santosh1210/product-service:latest
         ports:
         - containerPort: 3000
 ---
