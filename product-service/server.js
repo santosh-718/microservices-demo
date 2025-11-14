@@ -7,7 +7,7 @@ let products = [];
 
 // Health check
 app.get("/", (req, res) => {
-    res.send("Product Service running");
+    res.send("Product Service running Santosh");
 });
 
 // Get all
