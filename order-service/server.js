@@ -1,69 +1,68 @@
-import React, { useEffect, useState } from "react";
+const express = require("express");
+const axios = require("axios");
+const app = express();
 
-export default function App() {
-  const [orders, setOrders] = useState([]);
-  const [item, setItem] = useState("");
-  const [qty, setQty] = useState(1);
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-  const fetchOrders = async () => {
-    const res = await fetch("http://localhost:3000/orders");
-    const data = await res.json();
-    setOrders(data);
-  };
+// Change this to your Order service URL
+const ORDER_API = "http://localhost:3000";  
 
-  const createOrder = async () => {
-    const res = await fetch("http://localhost:3000/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ item, qty })
-    });
-    const data = await res.json();
-    setOrders([...orders, data]);
-    setItem("");
-    setQty(1);
-  };
+app.get("/", async (req, res) => {
+    let orders = [];
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+    try {
+        const result = await axios.get(`${ORDER_API}/orders`);
+        orders = result.data;
+    } catch (e) {
+        console.log("Order service not reachable");
+    }
 
-  return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Order Management UI</h1>
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Order UI</title>
+            <style>
+                body { font-family: Arial; margin: 40px; }
+                .box { border: 1px solid #ddd; padding: 20px; border-radius: 10px; width: 350px; }
+                input, button { padding: 10px; margin-top: 10px; width: 100%; }
+                button { background: blue; color: white; border: none; border-radius: 5px; cursor: pointer; }
+                button:hover { background: darkblue; }
+                .order { margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+            </style>
+        </head>
+        <body>
+            <h1>Order Management</h1>
 
-      <div className="mb-6 p-4 border rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2">Create Order</h2>
-        <input
-          className="border p-2 w-full rounded mb-3"
-          placeholder="Item name"
-          value={item}
-          onChange={(e) => setItem(e.target.value)}
-        />
-        <input
-          className="border p-2 w-full rounded mb-3"
-          type="number"
-          min="1"
-          value={qty}
-          onChange={(e) => setQty(e.target.value)}
-        />
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow"
-          onClick={createOrder}
-        >
-          Add Order
-        </button>
-      </div>
+            <div class="box">
+                <h3>Create Order</h3>
+                <form method="POST" action="/create">
+                    <input name="item" placeholder="Item name" required />
+                    <input name="qty" type="number" min="1" value="1" required />
+                    <button type="submit">Add Order</button>
+                </form>
+            </div>
 
-      <div className="p-4 border rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2">Orders List</h2>
-        <ul>
-          {orders.map((o) => (
-            <li key={o.id} className="border-b py-2">
-              <span className="font-medium">{o.item}</span> — Qty: {o.qty}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
+            <h3>Orders</h3>
+            ${orders
+                .map(o => `<div class="order"><strong>${o.item}</strong> — Qty: ${o.qty}</div>`)
+                .join("")}
+        </body>
+        </html>
+    `);
+});
+
+app.post("/create", async (req, res) => {
+    const { item, qty } = req.body;
+
+    try {
+        await axios.post(`${ORDER_API}/orders`, { item, qty });
+    } catch (error) {
+        console.log("Error creating order");
+    }
+
+    res.redirect("/");
+});
+
+app.listen(4000, () => console.log("UI running on port 4000"));
