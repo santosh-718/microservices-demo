@@ -1,24 +1,13 @@
 const express = require("express");
-const axios = require("axios");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Product API (self)
-const PRODUCT_API = "http://localhost:3000";
-
 let products = [];
 
-// Health check
-app.get("/", async (req, res) => {
-    try {
-        // Fetch all products
-        // (real world: call another microservice)
-    } catch (e) {
-        console.log("Product service not reachable");
-    }
-
+// MAIN UI PAGE
+app.get("/", (req, res) => {
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -49,10 +38,11 @@ app.get("/", async (req, res) => {
             ${products
                 .map(
                     p => `
-                <div class="product">
-                    <strong>${p.name}</strong> — ₹${p.price}<br/>
-                    <small>Created: ${new Date(p.createdAt).toLocaleString()}</small>
-                </div>`
+                    <div class="product">
+                        <strong>${p.name}</strong> — ₹${p.price}<br/>
+                        <small>Created: ${new Date(p.createdAt).toLocaleString()}</small>
+                    </div>
+                `
                 )
                 .join("")}
         </body>
@@ -60,13 +50,9 @@ app.get("/", async (req, res) => {
     `);
 });
 
-// Create Product
+// ADD PRODUCT
 app.post("/create", (req, res) => {
     const { name, price } = req.body;
-
-    if (!name || !price) {
-        return res.send("Name & Price required");
-    }
 
     const product = {
         id: products.length + 1,
@@ -77,12 +63,13 @@ app.post("/create", (req, res) => {
 
     products.push(product);
 
+    // reload UI to show the new product
     res.redirect("/");
 });
 
-// REST API Endpoints
+// API: Get all products (optional)
 app.get("/products", (req, res) => {
     res.json(products);
 });
 
-app.listen(3000, "0.0.0.0", () => console.log("Product Service UI running on port 3000"));
+app.listen(3000, "0.0.0.0", () => console.log("Product Service running on 3000"));
