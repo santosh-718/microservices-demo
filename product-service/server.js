@@ -6,7 +6,7 @@ app.use(express.json());
 
 let products = [];
 
-// MAIN UI PAGE
+// UI PAGE
 app.get("/", (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
                     p => `
                     <div class="product">
                         <strong>${p.name}</strong> — ₹${p.price}<br/>
-                        <small>Created: ${new Date(p.createdAt).toLocaleString()}</small>
+                        <small>${new Date(p.createdAt).toLocaleString()}</small>
                     </div>
                 `
                 )
@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
     `);
 });
 
-// ADD PRODUCT
+// CREATE PRODUCT (Fix for 404)
 app.post("/create", (req, res) => {
     const { name, price } = req.body;
 
@@ -58,18 +58,18 @@ app.post("/create", (req, res) => {
         id: products.length + 1,
         name,
         price,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
     };
 
     products.push(product);
 
-    // reload UI to show the new product
+    // Reload UI
     res.redirect("/");
 });
 
-// API: Get all products (optional)
+// API GET all products
 app.get("/products", (req, res) => {
     res.json(products);
 });
 
-app.listen(3000, "0.0.0.0", () => console.log("Product Service running on 3000"));
+app.listen(3000, "0.0.0.0", () => console.log("Product Service running on port 3000"));
