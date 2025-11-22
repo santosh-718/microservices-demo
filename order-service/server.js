@@ -22,7 +22,7 @@ app.get("/", async (req, res) => {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Order UI</title>
+            <title>Order details</title>
             <style>
                 body { font-family: Arial; margin: 40px; }
                 .box { border: 1px solid #ddd; padding: 20px; border-radius: 10px; width: 350px; }
